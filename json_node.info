@@ -1,0 +1,5 @@
+name = JSON Node
+description = Provides a JSON display for nodes and a views display plugin for the display of lists of JSON nodes.
+package = JSON
+dependencies[] = "content"
+core = 6.x

@@ -1,0 +1,125 @@
+<?php
+
+define('NODE_BUILD_JSON', 'json');
+
+/**
+* Implements hook_content_build_modes().
+*
+* Provide a build mode for use with a view used on the recipient landing page.
+*
+*/
+function json_node_content_build_modes() {
+  return array(
+    'json' => array(
+      'title' => t('JSON'),
+      'build modes' => array(
+        'json' => array(
+          'title' => t('JSON'),
+          'views style' => TRUE,
+        ),
+      ),
+    ),
+  );
+}
+
+/**
+ * Display a single JSON node
+ *
+ * not actively used.
+ */
+function json_node_view($node) {
+  _json_node_prepare_node_view($node);
+  return theme('json_node_view', $node);
+}
+
+/**
+ * Prepares a $raw node object for JSON. Runs the node though cck and sets
+ * appropriate flags.
+ */
+function _json_node_prepare_node_view($node) {
+  $node = (object)$node;
+  $node->build_mode = NODE_BUILD_JSON;
+
+  // Clean the node object
+  _json_node_excluded_fields($node);
+  _json_node_clean_object($node);
+}
+
+/**
+ * Implements hook_theme().
+ */
+function json_node_theme($existing, $type, $theme, $path) {
+  return array(
+    'json_node_view' => array(
+      'arguments' => array('node' => NULL),
+      'file' => 'theme.inc',
+      'path' => $path . '/theme',
+    ),
+  );
+}
+
+/**
+ * Removes fields from the raw $node object based off settings from cck.
+ */
+function _json_node_excluded_fields($node) {
+  foreach($node as $field => $value) {
+    if ($info = content_fields($field, $node->type)) {
+      if (theme('content_exclude', FALSE, $info, $node->build_mode)) {
+        unset($node->$field);
+      }
+    }
+  }
+}
+
+/**
+ * Clean site specific information off the node object as preparation
+ * for JSONification.
+ */
+function _json_node_clean_object($node) {
+  $keepers = array(
+    'nid',
+    'type',
+    'language',
+    'uid',
+    'status',
+    'created',
+    'changed',
+    'promote',
+    'title',
+    'body',
+    'teaser',
+    'name',
+    'buildmode',
+  );
+  foreach($node as $field => $value) {
+    // if we're not looking at a field.
+    // stripping fields has it's own step.
+    if ((strpos($field, 'field_') === FALSE)) {
+      // remove element that's not in $keepers.
+      if (!in_array($field, $keepers)) {
+        unset($node->$field);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function json_node_views_api() {
+  return array(
+    'api' => 2,
+  );
+}
+
+/**
+ * Sets proper headers for JSON and JSONifys a php array structure.
+ */
+function json_node_encode_json($var = NULL) {
+  // We are returning JavaScript, so tell the browser.
+  drupal_set_header('Content-Type: application/json');
+
+  if (isset($var)) {
+    echo json_encode($var);
+  }
+}
