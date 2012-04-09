@@ -6,41 +6,41 @@ function json_node_views_plugins() {
   $plugins = array(
     'module' => 'json_node', // This just tells our themes are elsewhere.
     'display' => array(
-      'json_feed' => array(
+      'json_node_display' => array(
         'title' => t('JSON Feed'),
-        'admin' => t('JSON Feed'),
-        'help' => t('Display the view as a JSON feed.'),
-        'handler' => 'json_node_plugin_display_json_feed',
-        'parent' => 'page', // so it knows to load the page plugin .inc file
-        'uses hook menu' => TRUE,
-        'use ajax' => FALSE,
-        'use pager' => FALSE,
-        'accept attachments' => FALSE,
+        'handler' => 'json_node_plugin_display_json',
         'path' => $path . '/includes',
+        'parent' => 'feed', // so it knows to load the page plugin .inc file
+        'help' => t('Display the view as a JSON feed.'),
+        'admin' => t('JSON Feed'),
+
+        'uses hook menu' => TRUE,
         'base' => array('node'), // only works with 'node' as base.
       ),
     ),
     'style' => array(
-      'json' => array(
+      'json_node_style' => array(
         'title' => t('JSON Feed'),
-        'help' => t('Generates an JSON feed from a view.'),
         'handler' => 'json_node_plugin_style_json',
+        'path' => $path . '/includes',
+        'help' => t('Generates an JSON feed from a view.'),
         'theme' => 'json_node_view_json',
         'theme path' => $path . '/theme',
         'theme file' => 'theme.inc',
+
         'uses row plugin' => TRUE,
         'uses options' => FALSE,
         'type' => 'json_feed',
-        'path' => $path . '/includes',
         'base' => array('node'), // only works with 'node' as base.
       ),
     ),
     'row' => array(
-      'json_node' => array(
+      'json_node_row' => array(
         'title' => t('JSON Node'),
-        'help' => t('Display the node with special JSON display.'),
         'handler' => 'json_node_plugin_row_json',
         'path' => $path . '/includes',
+        'help' => t('Display the node with special JSON display.'),
+
         'base' => array('node'), // only works with 'node' as base.
         'uses options' => FALSE,
         'uses fields' => FALSE,

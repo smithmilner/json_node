@@ -43,6 +43,9 @@ function _json_node_prepare_node_view($node) {
   // Clean the node object
   _json_node_excluded_fields($node);
   _json_node_clean_object($node);
+  _json_node_taxonomy_process($node);
+  _json_node_fields_process($node);
+  drupal_alter('json_node_alter', $node);
 }
 
 /**
@@ -90,6 +93,8 @@ function _json_node_clean_object($node) {
     'teaser',
     'name',
     'buildmode',
+    'taxonomy',
+    'path',
   );
   foreach($node as $field => $value) {
     // if we're not looking at a field.
@@ -99,6 +104,26 @@ function _json_node_clean_object($node) {
       if (!in_array($field, $keepers)) {
         unset($node->$field);
       }
+    }
+  }
+}
+
+function _json_node_taxonomy_process($node) {
+  $vocabularies = array();
+  $taxonomy = $node->taxonomy;
+  if (is_array($taxonomy)) {
+    foreach($taxonomy AS $key => $value) {
+      $vocabularies[$value->vid][$value->tid] = $value;
+    }
+  }
+  $node->taxonomy = $vocabularies;
+}
+
+function _json_node_fields_process($node) {
+  include 'includes/fields.inc';
+  foreach($node as $field => $value) {
+    if ($info = content_fields($field, $node->type)) {
+      _json_node_field_process($node, $field, $info);
     }
   }
 }
